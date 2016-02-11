@@ -26,12 +26,20 @@ public class Client extends javax.swing.JFrame {
     private DataOutputStream out;
     private static final int PORT_NUMBER = 4916;
     private Thread T1;
+    private Thread T3;
+    public static final String SERVER_NAME = "ALICE";
+    public static final String CLIENT_NAME = "BOB";
     /**
      * Creates new form Client
      */
     public Client()
     {
         initComponents();
+        T3 = new Thread(new Runnable(){
+            public void run(){
+                jTextArea1.setText(jTextArea1.getText()+(jTextArea1.getText().equals("")?"":"\n")+SERVER_NAME+"says: "+line);
+            }
+        });
         T1 = new Thread(new Runnable(){
         public void run()
         {
@@ -46,11 +54,14 @@ public class Client extends javax.swing.JFrame {
             while(true) {
                    line = in.readUTF(); // wait for the server to send a line of text.
                     System.out.println("From server: " + line);
-                
+                    T3.start();
+                    Thread.sleep(100);
             }
                 } catch (IOException ex) {
                     Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                } catch (InterruptedException ex) {
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     });
     T1.start();
@@ -146,7 +157,7 @@ public class Client extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
             line = jTextField1.getText();
-        
+            jTextArea1.setText(jTextArea1.getText()+(jTextArea1.getText().equals("")?"":"\n")+CLIENT_NAME+"says: "+line);
         Thread T2 = new Thread(new Runnable(){
             public void run()
             {
