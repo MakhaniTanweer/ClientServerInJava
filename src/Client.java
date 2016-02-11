@@ -26,7 +26,11 @@ public class Client extends javax.swing.JFrame {
     private DataOutputStream out;
     private static final int PORT_NUMBER = 4916;
     private Thread T1;
-    private Thread T3;
+    private Thread T3 = new Thread(new Runnable(){
+            public void run(){
+                jTextArea1.setText(jTextArea1.getText()+(jTextArea1.getText().equals("")?"":"\n")+SERVER_NAME+" says: "+line);
+            }
+        });
     public static final String SERVER_NAME = "ALICE";
     public static final String CLIENT_NAME = "BOB";
     /**
@@ -35,11 +39,7 @@ public class Client extends javax.swing.JFrame {
     public Client()
     {
         initComponents();
-        T3 = new Thread(new Runnable(){
-            public void run(){
-                jTextArea1.setText(jTextArea1.getText()+(jTextArea1.getText().equals("")?"":"\n")+SERVER_NAME+" says: "+line);
-            }
-        });
+        
         T1 = new Thread(new Runnable(){
         public void run()
         {
@@ -54,8 +54,14 @@ public class Client extends javax.swing.JFrame {
             while(true) {
                    line = in.readUTF(); // wait for the server to send a line of text.
                     System.out.println("From server: " + line);
+                    T3 = new Thread(new Runnable(){
+                        public void run(){
+                            jTextArea1.setText(jTextArea1.getText()+(jTextArea1.getText().equals("")?"":"\n")+SERVER_NAME+" says: "+line);
+                        }
+                    }); 
                     T3.start();
                     Thread.sleep(100);
+                    T3 = null;
             }
                 } catch (IOException ex) {
                     Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
@@ -121,11 +127,14 @@ public class Client extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(24, 24, 24)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE)
-                    .addComponent(jTextField1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 18, Short.MAX_VALUE)
-                .addComponent(jButton1))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 222, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 18, Short.MAX_VALUE)
+                        .addComponent(jButton1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))))
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jButton2)
                 .addGap(0, 0, Short.MAX_VALUE))
