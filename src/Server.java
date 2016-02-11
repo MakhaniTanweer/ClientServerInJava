@@ -21,6 +21,7 @@ public class Server extends javax.swing.JFrame {
     /**
      * Creates new form Server
      */
+    private volatile DataOutputStream out;
     public Server() {
         initComponents();
     }
@@ -39,6 +40,8 @@ public class Server extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextArea1 = new javax.swing.JTextArea();
         jButton2 = new javax.swing.JButton();
+        jTextField2 = new javax.swing.JTextField();
+        jButton3 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -71,6 +74,13 @@ public class Server extends javax.swing.JFrame {
             }
         });
 
+        jButton3.setText("->");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -87,6 +97,14 @@ public class Server extends javax.swing.JFrame {
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(jButton2)
                 .addGap(30, 30, 30))
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jTextField2)
+                .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addGap(162, 162, 162)
+                .addComponent(jButton3)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -98,7 +116,10 @@ public class Server extends javax.swing.JFrame {
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton2)
-                .addGap(0, 134, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 80, Short.MAX_VALUE)
+                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButton3))
         );
 
         pack();
@@ -129,28 +150,23 @@ public class Server extends javax.swing.JFrame {
                     //this.revalidate();
                     // Just converting them to different streams, so that string handling becomes easier.
                     DataInputStream in = new DataInputStream(sin);
-                    DataOutputStream out = new DataOutputStream(sout);
+                    out = new DataOutputStream(sout);
                     String line = null;
                     while(true) {
                         line = in.readUTF();
                         System.out.println("From Client: " + line);
                         Runnable r = new MyThread(jTextArea1,line);
                         Thread T2 = new Thread (r);
-                        Thread.sleep(1000);
-                       // T2.start();
-                       
+                        //Thread.sleep(1000);
+                       // T2.start();     
                         jTextArea1.setText(line);
-                        line=keyboard.readLine();
-                        System.out.println("From Server: "+line);
-                        out.writeUTF(line);
-                        System.out.println();
+                        
+                        
                         ss.close();
                     }
                 } catch (IOException ex) {
                     Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                } 
                 
             }
         }) ;
@@ -166,6 +182,25 @@ public class Server extends javax.swing.JFrame {
     private void jButton2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseClicked
 System.exit(0);        // TODO add your handling code here:
     }//GEN-LAST:event_jButton2MouseClicked
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+        Thread T2 = new Thread(new Runnable(){
+            public void run()
+            {
+                try {
+                    String line="I have been hardcoded";
+                    System.out.println("From Server: "+line);
+                    out.writeUTF(line);
+                    System.out.println();
+                } catch (IOException ex) {
+                    Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+        T2.start();
+            
+    }//GEN-LAST:event_jButton3ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -206,8 +241,10 @@ System.exit(0);        // TODO add your handling code here:
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField jTextField2;
     // End of variables declaration//GEN-END:variables
 }

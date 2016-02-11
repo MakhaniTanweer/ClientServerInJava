@@ -13,14 +13,47 @@ import java.awt.*;
 import java.awt.event.*;
 import java.net.*;
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 public class Client extends javax.swing.JFrame {
 
+    public volatile String line;
+    private Socket socket;
+    private PrintStream pr;
+    private InputStream sin;
+    private OutputStream sout;
+    private DataInputStream in;
+    private DataOutputStream out;
+    private static final int PORT_NUMBER = 4916;
+    private Thread T1;
     /**
      * Creates new form Client
      */
     public Client()
     {
         initComponents();
+        T1 = new Thread(new Runnable(){
+        public void run()
+        {
+            try {
+            socket = new Socket("localhost",PORT_NUMBER);
+            pr= new PrintStream(socket.getOutputStream());
+            sin = socket.getInputStream();
+            sout = socket.getOutputStream();
+            in = new DataInputStream(sin);
+            out = new DataOutputStream(sout);
+    
+            while(true) {
+                   line = in.readUTF(); // wait for the server to send a line of text.
+                    System.out.println("From server: " + line);
+                
+            }
+                } catch (IOException ex) {
+                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                }
+        }
+    });
+    T1.start();
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -34,6 +67,8 @@ public class Client extends javax.swing.JFrame {
         jTextField1 = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextArea1 = new javax.swing.JTextArea();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -52,6 +87,20 @@ public class Client extends javax.swing.JFrame {
         jTextArea1.setRows(5);
         jScrollPane1.setViewportView(jTextArea1);
 
+        jButton1.setText("->");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        jButton2.setText("Close");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -61,16 +110,24 @@ public class Client extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 348, Short.MAX_VALUE)
                     .addComponent(jTextField1))
-                .addContainerGap(28, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(170, 170, 170)
+                .addComponent(jButton1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 165, Short.MAX_VALUE)
+                .addComponent(jButton2))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 223, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(28, 28, 28))
+                .addGap(5, 5, 5)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(jButton2)))
         );
 
         pack();
@@ -82,38 +139,34 @@ public class Client extends javax.swing.JFrame {
 
     private void jTextField1KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField1KeyTyped
         // TODO add your handling code here:
-            try{
-                  Socket socket = new Socket("localhost",4916);
-                    PrintStream pr= new PrintStream(socket.getOutputStream());
-
-    System.out.println("ENTER SOMETHING: ");
-
-    InputStream sin = socket.getInputStream();
-    OutputStream sout = socket.getOutputStream();
-    DataInputStream in = new DataInputStream(sin);
-    DataOutputStream out = new DataOutputStream(sout);
-    BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
-    String line = null;
     
-    //System.out.println("Type to sent it to server: ");
-    System.out.println();
-    KeyEvent input = null;
-    //Thread.sleep(1000);
-    line = jTextField1.getText();
-    while(true) {
-    line = keyboard.readLine(); // wait for the user to type in something and press enter.
-    System.out. println("Enter more lines: ");
-    System.out.println();
-    out.writeUTF(line); // send the above line to the server.
-    out.flush(); // flush the stream to ensure that the data reaches the other end.
-    line = in.readUTF(); // wait for the server to send a line of text.
-    System.out.println("From server: " + line);
-            }
-    } catch(Exception x) {
-    System.out.println("Exception: "+x);;
     
-    }    
     }//GEN-LAST:event_jTextField1KeyTyped
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+            line = jTextField1.getText();
+        
+        Thread T2 = new Thread(new Runnable(){
+            public void run()
+            {
+                try {
+                    out.writeUTF(line); // send the above line to the server.
+                    out.flush(); // flush the stream to ensure that the data reaches the other end.
+                } catch (IOException ex) {
+                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+            }
+        });
+        T2.start();
+        
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        System.exit(0);
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -145,15 +198,20 @@ public class Client extends javax.swing.JFrame {
         /* Create and display the form */
 
 
-
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new Client().setVisible(true);
             }
         });
+        
+        
+        
+        
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextField jTextField1;
